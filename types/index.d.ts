@@ -193,6 +193,6 @@ declare class Cropper {
   static setDefaults(options: Cropper.Options): void;
 }
 
-declare module 'cropperjs' {
+declare module '@daiyam/cropperjs' {
   export default Cropper;
 }

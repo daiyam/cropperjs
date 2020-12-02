@@ -1,17 +1,17 @@
 /*!
- * Cropper.js v1.5.9
+ * DaiyamCropper.js v1.5.9-d2
  * https://fengyuanchen.github.io/cropperjs
  *
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-12-02T15:01:55.811Z
+ * Date: 2020-12-02T15:48:02.072Z
  */
 
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Cropper = factory());
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.DaiyamCropper = factory());
 }(this, (function () { 'use strict';
 
   function _typeof(obj) {

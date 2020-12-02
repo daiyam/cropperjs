@@ -1,14 +1,12 @@
 /*!
- * Cropper.js v1.5.9
+ * DaiyamCropper.js v1.5.9-d2
  * https://fengyuanchen.github.io/cropperjs
  *
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-12-02T15:01:55.811Z
+ * Date: 2020-12-02T15:48:02.072Z
  */
-
-'use strict';
 
 function _typeof(obj) {
   "@babel/helpers - typeof";
@@ -3633,4 +3631,4 @@ var Cropper = /*#__PURE__*/function () {
 
 assign(Cropper.prototype, render, preview, events, handlers, change, methods);
 
-module.exports = Cropper;
+export default Cropper;
