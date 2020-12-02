@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-09-10T13:16:26.743Z
+ * Date: 2020-12-02T15:01:55.811Z
  */
 
 (function (global, factory) {
@@ -210,6 +210,8 @@
     data: null,
     // A selector for adding extra containers to preview
     preview: '',
+    // Take rounding errors into account for preview
+    precisePreview: false,
     // Re-render the cropper when resize the window
     responsive: true,
     // Restore the cropped area after resize the window
@@ -999,7 +1001,7 @@
     }, 'cover');
     var destWidth = Math.min(destMaxSizes.width, Math.max(destMinSizes.width, imageNaturalWidth));
     var destHeight = Math.min(destMaxSizes.height, Math.max(destMinSizes.height, imageNaturalHeight));
-    var params = [-destWidth / 2, -destHeight / 2, destWidth, destHeight];
+    var params = [-destWidth / 2, -destHeight / 2, destWidth, destHeight].map(normalizeDecimalNumber);
     canvas.width = normalizeDecimalNumber(width);
     canvas.height = normalizeDecimalNumber(height);
     context.fillStyle = fillColor;
@@ -1010,9 +1012,7 @@
     context.scale(scaleX, scaleY);
     context.imageSmoothingEnabled = imageSmoothingEnabled;
     context.imageSmoothingQuality = imageSmoothingQuality;
-    context.drawImage.apply(context, [image].concat(_toConsumableArray(params.map(function (param) {
-      return Math.floor(normalizeDecimalNumber(param));
-    }))));
+    context.drawImage(image, params[0], params[1], Math.floor(params[2]), Math.floor(params[3]));
     context.restore();
     return canvas;
   }
@@ -1661,11 +1661,14 @@
     preview: function preview() {
       var imageData = this.imageData,
           canvasData = this.canvasData,
-          cropBoxData = this.cropBoxData;
+          cropBoxData = this.cropBoxData,
+          options = this.options;
       var cropBoxWidth = cropBoxData.width,
           cropBoxHeight = cropBoxData.height;
       var width = imageData.width,
           height = imageData.height;
+      var rawRatioX;
+      var rawRatioY;
       var left = cropBoxData.left - canvasData.left - imageData.left;
       var top = cropBoxData.top - canvasData.top - imageData.top;
 
@@ -1680,6 +1683,20 @@
         translateX: -left,
         translateY: -top
       }, imageData))));
+
+      if (options.precisePreview) {
+        // emulate rounding that takes place during the crop process
+        // to make the preview exactly match with the cropped image
+        rawRatioX = canvasData.naturalWidth * imageData.scaleX / canvasData.width;
+        rawRatioY = canvasData.naturalHeight * imageData.scaleY / canvasData.height;
+        cropBoxWidth = Math.floor(cropBoxWidth * rawRatioX);
+        cropBoxHeight = Math.floor(cropBoxHeight * rawRatioY);
+        left = Math.floor(left * rawRatioX);
+        top = Math.floor(top * rawRatioY);
+        width = imageData.naturalWidth * imageData.scaleX;
+        height = imageData.naturalHeight * imageData.scaleY;
+      }
+
       forEach(this.previews, function (element) {
         var data = getData(element, DATA_PREVIEW);
         var originalWidth = data.width;
@@ -3338,9 +3355,10 @@
 
         if (options.checkCrossOrigin && isCrossOriginURL(url) && element.crossOrigin) {
           url = addTimestamp(url);
-        }
+        } // The third parameter is required for avoiding side-effect (#682)
 
-        xhr.open('GET', url);
+
+        xhr.open('GET', url, true);
         xhr.responseType = 'arraybuffer';
         xhr.withCredentials = element.crossOrigin === 'use-credentials';
         xhr.send();
